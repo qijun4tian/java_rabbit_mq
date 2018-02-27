@@ -97,6 +97,7 @@ public class EmitLogDirect {
         service.shutdown();
         channel.close();
         connection.close();
+        // ooooooo
 
         }
     }
