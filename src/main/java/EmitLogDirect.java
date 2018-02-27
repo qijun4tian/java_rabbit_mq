@@ -99,5 +99,7 @@ public class EmitLogDirect {
         connection.close();
         // ooooooo
 
+        // 22222222
+
         }
     }
