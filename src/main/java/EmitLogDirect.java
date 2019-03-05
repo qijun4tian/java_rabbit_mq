@@ -31,7 +31,7 @@ public class EmitLogDirect {
         channel.exchangeDeclare(EXCHANGE_NAME, "direct",true);
         // 设定信道的confirm模式
 //        channel.confirmSelect();
-        channel.txSelect();
+//        channel.txSelect();
 //        channel.basicAck();
         // 发送消息
 
@@ -42,50 +42,57 @@ public class EmitLogDirect {
 //         channel.
 
         ExecutorService service = Executors.newFixedThreadPool(2);
-
-       while(System.currentTimeMillis() < start+1000){
-//            Runnable runnable = ()-> {
-                String message = "Qijun-MSG log : [" + "]" + UUID.randomUUID().toString();
-                // 发布消息至交换器，设置mandatory 为true 可以设置 return_call_back
-                try {
-                    channel.basicPublish(EXCHANGE_NAME, "", true, MessageProperties.MINIMAL_PERSISTENT_BASIC, message.getBytes());
-                    channel.txCommit();
-                } catch (Exception e) {
-                }
-                if (System.currentTimeMillis() <= start + 1000) {
-                   count.incrementAndGet();
-                }
-
-            ;
-
-
-        }
-
-//        for(int i =0 ;i<10; i++){
 //
-//            System.out.println("di"+i);
-//            try {
-//                channel.basicPublish(EXCHANGE_NAME, "", true, MessageProperties.MINIMAL_PERSISTENT_BASIC, "1111".getBytes());
-//                channel.txCommit();
-//            } catch (Exception e) {
+//       while(System.currentTimeMillis() < start+1000){
+//                String message = "Qijun-MSG log : [" + "]" + UUID.randomUUID().toString();
+//                // 发布消息至交换器，设置mandatory 为true 可以设置 return_call_back
+//                try {
+//                    channel.basicPublish(EXCHANGE_NAME, "", true, MessageProperties.MINIMAL_PERSISTENT_BASIC, message.getBytes());
+//                    channel.txCommit();
+//                } catch (Exception e) {
+//                }
+//                if (System.currentTimeMillis() <= start + 1000) {
+//                   count.incrementAndGet();
+//                }
 //
-//            }
-//            System.out.println("di2"+i);
+//
 //        }
+
+        /**测试confirm callback 和return callback**/
+        for(int i =0 ;i<10; i++){
+
+            System.out.println("di"+i);
+            try {
+                channel.basicPublish(EXCHANGE_NAME, "", true, MessageProperties.MINIMAL_PERSISTENT_BASIC, "1111".getBytes());
+                channel.txCommit();
+            } catch (Exception e) {
+
+            }
+            System.out.println("di2"+i);
+        }
         System.out.println("count="+ count);
 
 
+        channel.confirmSelect();
+        channel.addConfirmListener(new ConfirmListener(){
+            @Override
+            public void handleAck(long deliveryTag, boolean multiple) throws IOException {
+                System.out.println("deliveryTag= "+deliveryTag+"multiple= "+multiple);
 
-//        channel.addConfirmListener(new ConfirmListener(){
-//            public void handleAck(long deliveryTag, boolean multiple) throws IOException {
-//                System.out.println("deliveryTag= "+deliveryTag+"multiple= "+multiple);
-//
-//            }
-//
-//            public void handleNack(long deliveryTag, boolean multiple) throws IOException {
-//                System.out.println("nack"+"deliveryTag= "+deliveryTag+"multiple= "+multiple);
-//            }
-//        });
+            }
+            @Override
+            public void handleNack(long deliveryTag, boolean multiple) throws IOException {
+                System.out.println("nack"+"deliveryTag= "+deliveryTag+"multiple= "+multiple);
+            }
+        });
+        channel.addReturnListener(new ReturnListener() {
+            @Override
+            public void handleReturn(int replyCode, String replyText, String exchange, String routingKey, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                System.out.println("replyCode="+replyCode+" replyText="+replyText);
+            }
+        });
+
+        /**测试confirm callback 和return callback**/
 
         // 关闭频道和连接
 
