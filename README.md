@@ -1,2 +1,2 @@
 # java_rabbit_mq
-## hello world::`
+## rabbit_mq java学习文档
